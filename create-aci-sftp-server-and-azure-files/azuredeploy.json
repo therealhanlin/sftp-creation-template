@@ -41,6 +41,7 @@
         },
         "sftpUser": {
             "type": "string",
+            "defaultValue": "ftpadmin",
             "metadata": {
                 "description": "Username to use for SFTP access"
             }
@@ -49,6 +50,17 @@
             "type": "securestring",
             "metadata": {
                 "description": "Password to use for SFTP access"
+            }
+        },
+        "startupCommands": {
+            "type": "array",
+            "defaultValue": [
+                "/bin/bash",
+                "-c",
+                "mkdir -p /home/ftpadmin/aeroplan/xonair /home/ftpadmin/aeroplan/xreject; /entrypoint"
+            ],
+            "metadata": {
+                "description": "Commands to execute on start up"
             }
         },
         "location": {
@@ -60,7 +72,7 @@
         },
         "containerGroupDNSLabel": {
             "type": "string",
-            "defaultValue": "[concat(uniqueString(resourceGroup().name),'-', substring(uniqueString(deployment().name), 0, 4))]",
+            "defaultValue": "[concat(parameters('storageAccountNamePrefix'),'-', substring(uniqueString(deployment().name), 0, 4))]",
             "metadata": {
                 "description": "DNS label for container group"
             }
@@ -124,7 +136,7 @@
                             "environmentVariables": [
                                 {
                                     "name": "SFTP_USERS",
-                                    "value": "[variables('sftpEnvVariable')]"
+                                    "secureValue": "[variables('sftpEnvVariable')]"
                                 }
                             ],
                             "resources": {
@@ -140,11 +152,12 @@
                             ],
                             "volumeMounts": [
                                 {
-                                    "mountPath": "[concat('/home/', parameters('sftpUser'), '/upload')]",
+                                    "mountPath": "[concat('/home/', parameters('sftpUser'), '/aeroplan')]",
                                     "name": "sftpvolume",
                                     "readOnly": false
                                 }
-                            ]
+                            ],
+                            "command": "[parameters('startupCommands')]"
                         }
                     }
                 ],
