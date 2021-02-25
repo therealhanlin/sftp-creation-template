@@ -57,7 +57,7 @@
             "defaultValue": [
                 "/bin/bash",
                 "-c",
-                "mkdir -p /home/ftpadmin/aeroplan/xonair /home/ftpadmin/aeroplan/xreject; /entrypoint"
+                "mkdir -p /home/ftpadmin/sftpshare/aeroplan/xonair /home/ftpadmin/sftpshare/aeroplan/xreject /home/ftpadmin/sftpshare/upload; /entrypoint"
             ],
             "metadata": {
                 "description": "Commands to execute on start up"
@@ -152,7 +152,7 @@
                             ],
                             "volumeMounts": [
                                 {
-                                    "mountPath": "[concat('/home/', parameters('sftpUser'), '/aeroplan')]",
+                                    "mountPath": "[concat('/home/', parameters('sftpUser'), '/sftpshare')]",
                                     "name": "sftpvolume",
                                     "readOnly": false
                                 }
