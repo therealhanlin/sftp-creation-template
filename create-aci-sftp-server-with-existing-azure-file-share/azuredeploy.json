@@ -1,9 +1,22 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        "environment": {
+            "type": "string",
+            "defaultValue": "STG",
+            "allowedValues": [
+                "PROD",
+                "STG",
+                "DEV"
+            ],
+            "metadata": {
+                "description": "Deployment environment"
+            }
+        },
         "existingStorageAccountResourceGroupName": {
             "type": "string",
+            "defaultValue": "[resourceGroup().name]",
             "metadata": {
                 "description": "Resource group for existing storage account"
             }
@@ -22,6 +35,7 @@
         },
         "sftpUser": {
             "type": "string",
+            "defaultValue": "ftpadmin",
             "metadata": {
                 "description": "Username to use for SFTP access"
             }
@@ -30,6 +44,17 @@
             "type": "securestring",
             "metadata": {
                 "description": "Password to use for SFTP access"
+            }
+        },
+        "startupCommands": {
+            "type": "array",
+            "defaultValue": [
+                "/bin/bash",
+                "-c",
+                "mkdir -p /home/ftpadmin/sftpshare/aeroplan/xonair /home/ftpadmin/sftpshare/aeroplan/xreject /home/ftpadmin/sftpshare/upload; /entrypoint"
+            ],
+            "metadata": {
+                "description": "Commands to execute on start up"
             }
         },
         "location": {
@@ -41,38 +66,37 @@
         },
         "containerGroupDNSLabel": {
             "type": "string",
-            "defaultValue": "[uniqueString(resourceGroup().id, deployment().name)]",
-            "metadata" : {
+            "defaultValue": "[concat('rmsftp', toLower(parameters('environment')), '-', substring(uniqueString(deployment().name), 0, 4))]",
+            "metadata": {
                 "description": "DNS label for container group"
+            }
+        },
+        "resourceTags": {
+            "type": "object",
+            "defaultValue": {
+                "environment": "[parameters('environment')]",
+                "Owner": "ITOps",
+                "service": "sftp"
+            },
+            "metadata": {
+                "description": "Resource tags for management"
             }
         }
     },
     "variables": {
         "sftpContainerName": "sftp",
-        "sftpContainerGroupName": "sftp-group",
+        "sftpContainerGroupName": "[concat('sftp', toLower(parameters('environment')), '-api-group')]",
         "sftpContainerImage": "atmoz/sftp:latest",
         "sftpEnvVariable": "[concat(parameters('sftpUser'), ':', parameters('sftpPassword'), ':1001')]",
         "storageAccountId": "[resourceId(parameters('existingStorageAccountResourceGroupName'), 'Microsoft.Storage/storageAccounts', parameters('existingStorageAccountName'))]"
     },
     "resources": [
         {
-            "type": "Microsoft.Resources/deployments",
-            "name": "pid-18f281fe-d1e1-502c-8b87-d945383dc75b",
-            "apiVersion": "2018-05-01",
-            "properties": {
-                "mode": "Incremental",
-                "template": {
-                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-                    "contentVersion": "1.0.0.0",
-                    "resources": []
-                }
-            }
-        },
-        {
             "type": "Microsoft.ContainerInstance/containerGroups",
             "name": "[variables('sftpContainerGroupName')]",
             "apiVersion": "2018-10-01",
             "location": "[parameters('location')]",
+            "tags": "[parameters('resourceTags')]",
             "properties": {
                 "containers": [
                     {
@@ -82,12 +106,12 @@
                             "environmentVariables": [
                                 {
                                     "name": "SFTP_USERS",
-                                    "value": "[variables('sftpEnvVariable')]"
+                                    "secureValue": "[variables('sftpEnvVariable')]"
                                 }
                             ],
                             "resources": {
                                 "requests": {
-                                    "cpu": 2,
+                                    "cpu": 1,
                                     "memoryInGB": 1
                                 }
                             },
@@ -98,11 +122,12 @@
                             ],
                             "volumeMounts": [
                                 {
-                                    "mountPath": "[concat('/home/', parameters('sftpUser'), '/upload')]",
+                                    "mountPath": "[concat('/home/', parameters('sftpUser'), '/sftpshare')]",
                                     "name": "sftpvolume",
                                     "readOnly": false
                                 }
-                            ]
+                            ],
+                            "command": "[parameters('startupCommands')]"
                         }
                     }
                 ],

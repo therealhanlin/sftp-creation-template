@@ -91,8 +91,8 @@
     },
     "variables": {
         "sftpContainerName": "sftp",
-        "sftpContainerGroupName": "sftp-aci-group",
-        "sftpContainerImage": "atmoz/sftp:latest",
+        "sftpContainerGroupName": "[concat('sftp', toLower(parameters('environment')), '-api-group')]",
+        "sftpContainerImage": "cooldockerid/sftp:latest",
         "sftpEnvVariable": "[concat(parameters('sftpUser'), ':', parameters('sftpPassword'), ':1001')]",
         "storageAccountName": "[concat(parameters('storageAccountNamePrefix'), toLower(parameters('environment')) , substring(uniqueString(resourceGroup().id), 0, 4))]"
     },
@@ -141,7 +141,7 @@
                             ],
                             "resources": {
                                 "requests": {
-                                    "cpu": 2,
+                                    "cpu": 1,
                                     "memoryInGB": 1
                                 }
                             },
