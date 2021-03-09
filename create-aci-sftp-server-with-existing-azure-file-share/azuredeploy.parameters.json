@@ -5,9 +5,6 @@
     "sftpUser": {
       "value": "GEN-UNIQUE-6"
     },
-    "sftpPassword": {
-      "value": "GEN-PASSWORD"
-    },
     "existingStorageAccountResourceGroupName": {
       "value": "GET-PREREQ-existingStgAcctRGName"
     },
