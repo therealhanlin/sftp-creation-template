@@ -330,4 +330,4 @@ ASALocalRun/
 .mfractor/
 
 # DS Store file
-*.DS_Store
+**/*.DS_Store*
