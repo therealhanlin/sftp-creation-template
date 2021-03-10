@@ -84,7 +84,7 @@
             ]
         },
         {
-            "name": "[concat(variables('storageAccountName'), '/default/sshauth')]",
+            "name": "[concat(variables('storageAccountName'), '/default/pubkey')]",
             "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
             "apiVersion": "2019-06-01",
             "dependsOn": [
@@ -92,7 +92,7 @@
             ]
         },
         {
-            "name": "[concat(variables('storageAccountName'), '/default/sshkey')]",
+            "name": "[concat(variables('storageAccountName'), '/default/ssh')]",
             "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
             "apiVersion": "2019-06-01",
             "dependsOn": [
