@@ -81,7 +81,7 @@
     "variables": {
         "sftpContainerName": "sftp",
         "sftpContainerGroupName": "[concat('sftp', toLower(parameters('environment')), '-api-group')]",
-        "sftpContainerImage": "cooldockerid/sftp:latest",
+        "sftpContainerImage": "atomz/sftp:latest",
         "sftpEnvVariable": "[concat(parameters('sftpUser'), ':', parameters('sftpPassword'), ':1001')]",
         "storageAccountName": "[concat(parameters('storageAccountNamePrefix'), toLower(parameters('environment')) , substring(uniqueString(resourceGroup().id), 0, 4))]"
     },
@@ -109,14 +109,6 @@
         },
         {
             "name": "[concat(variables('storageAccountName'), '/default/pubkey')]",
-            "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
-            "apiVersion": "2019-06-01",
-            "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]"
-            ]
-        },
-        {
-            "name": "[concat(variables('storageAccountName'), '/default/ssh')]",
             "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
             "apiVersion": "2019-06-01",
             "dependsOn": [
@@ -166,11 +158,6 @@
                                     "mountPath": "[concat('/home/', parameters('sftpUser'), '/.ssh/keys')]",
                                     "name": "pubkeyvolume",
                                     "readOnly": false
-                                },
-                                {
-                                    "mountPath": "/etc/ssh",
-                                    "name": "sshvolume",
-                                    "readOnly": false
                                 }
                             ]
                         }
@@ -203,15 +190,6 @@
                         "azureFile": {
                             "readOnly": true,
                             "shareName": "pubkey",
-                            "storageAccountName": "[variables('storageAccountName')]",
-                            "storageAccountKey": "[listKeys(variables('storageAccountName'),'2018-02-01').keys[0].value]"
-                        }
-                    },
-                    {
-                        "name": "sshvolume",
-                        "azureFile": {
-                            "readOnly": true,
-                            "shareName": "ssh",
                             "storageAccountName": "[variables('storageAccountName')]",
                             "storageAccountKey": "[listKeys(variables('storageAccountName'),'2018-02-01').keys[0].value]"
                         }
